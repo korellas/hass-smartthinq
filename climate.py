@@ -14,7 +14,7 @@ try:
     from homeassistant.components.climate import ClimateEntity
 except ImportError:
     from homeassistant.components.climate import ClimateDevice \
-         as ClimateEntity
+        as ClimateEntity
 
 REQUIREMENTS = ['wideq']
 
@@ -46,16 +46,19 @@ FAN_MODES = {
     'POWER': 'power',
 }
 
+
 def swing_modes_index():
     from wideq import ACHSwingMode, ACVSwingMode
-            # name: [horz_key, vert_key]
+    # name: [horz_key, vert_key]
     return {'Off': [ACHSwingMode.OFF, ACVSwingMode.OFF],
-            'Vertical': [ACHSwingMode.OFF, ACVSwingMode.ALL] ,
+            'Vertical': [ACHSwingMode.OFF, ACVSwingMode.ALL],
             'Horizontal': [ACHSwingMode.ALL, ACVSwingMode.OFF],
-            'Vertical and Horizontal': [ACHSwingMode.ALL, ACVSwingMode.ALL] ,
-            'Up Left': [ACHSwingMode.FIVE, ACVSwingMode.ONE] ,
-            'Up Right': [ACHSwingMode.ONE, ACVSwingMode.ONE] ,
+            'Vertical and Horizontal': [ACHSwingMode.ALL, ACVSwingMode.ALL],
+            'Up Left': [ACHSwingMode.FIVE, ACVSwingMode.ONE],
+            'Up Right': [ACHSwingMode.ONE, ACVSwingMode.ONE],
             'Up': [ACHSwingMode.ALL, ACVSwingMode.ONE]}
+
+
 SWING_MODE_DEFAULT = "Unknown"
 
 
@@ -128,7 +131,7 @@ class LGDevice(ClimateEntity):
         # store the timestamp for when we set this value.
         self._transient_temp = None
         self._transient_time = None
-        
+
         self._swing_mode = SWING_MODE_DEFAULT
 
     @property
@@ -216,27 +219,28 @@ class LGDevice(ClimateEntity):
     @property
     def swing_mode(self):
         # try to find out if the (initial) state matches a known state actually
-        if self._swing_mode == SWING_MODE_DEFAULT:
-            for k, v in swing_modes_index().items():
-                if v[0] == self._state.horz_swing and v[1] == self._state.vert_swing:
-                    self._swing_mode = k
-                    break
-            else:
-                return SWING_MODE_DEFAULT
-        
+        # if self._swing_mode == SWING_MODE_DEFAULT:
+        #     for k, v in swing_modes_index().items():
+        #         if v[0] == self._state.horz_swing and v[1] == self._state.vert_swing:
+        #             self._swing_mode = k
+        #             break
+        #     else:
+        #         return SWING_MODE_DEFAULT
+        self._swing_mode = 'Off' # 강제적용
+
         return self._swing_mode
 
     def set_swing_mode(self, swing_mode):
         self._swing_mode = swing_mode
         LOGGER.info('Setting swing mode to %s...', self._swing_mode)
-        
+
         horiz_mode = swing_modes_index()[self._swing_mode][0]
         vert_mode = swing_modes_index()[self._swing_mode][1]
-        
+
         LOGGER.info('Setting device horizontal swing mode to %s...', horiz_mode)
         self._ac.set_horz_swing(horiz_mode)
         LOGGER.info('Mode set.')
-        
+
         LOGGER.info('Setting device vertical swing mode to %s...', vert_mode)
         self._ac.set_vert_swing(vert_mode)
         LOGGER.info('Mode set.')
